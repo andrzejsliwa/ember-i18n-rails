@@ -15,8 +15,8 @@ __Version:__ 0.1
     rake ember:i18n:setup
 
 ### in app/assets/javascript/application.js
-    //= require i18n
-    //= require i18n/translations
+    //= require i18n/ember-i18n
+    //= require i18n/translations_en
 
 ## Exporting locales:
 
