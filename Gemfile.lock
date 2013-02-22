@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ember-i18n-rails (0.2.0)
+    ember-i18n-rails (0.3.0)
       i18n
 
 GEM
