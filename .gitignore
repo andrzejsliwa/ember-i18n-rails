@@ -1,0 +1,6 @@
+doc
+coverage
+pkg
+idea
+spec/tmp
+.DS_Store

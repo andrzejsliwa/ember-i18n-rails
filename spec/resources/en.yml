@@ -1,0 +1,7 @@
+en:
+  admin:
+    show:
+      title: "Visualiser"
+      note: "plus de détails"
+    edit:
+      title: "Editer"
