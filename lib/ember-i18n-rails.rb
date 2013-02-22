@@ -7,9 +7,6 @@ module Ember
     require "ember/i18n/railtie" if Rails.version >= "3.0"
     require "ember/i18n/engine" if Rails.version >= "3.1"
 
-    # deep_merge by Stefan Rusterholz, see http://www.ruby-forum.com/topic/142809
-    MERGER = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &MERGER) : v2 }
-
     # Under rails 3.1.1 and higher, perform a check to ensure that the
     # full environment will be available during asset compilation.
     # This is required to ensure I18n is loaded.
