@@ -39,7 +39,13 @@ module Ember
     # Export translations to JavaScript, considering settings
     # from configuration file
     def export!
-      save(flat_hash(translations), File.join(export_dir, "translations.js"))
+      if config[:split]
+        translations.keys.each do |locale|
+          save(flat_hash(translations[locale]), File.join(export_dir, "translations_#{locale}.js"))
+        end
+      else
+        save(flat_hash(translations), File.join(export_dir, "translations.js"))
+      end
     end
 
     def flat_hash(data, prefix = '', result = {})
@@ -56,11 +62,27 @@ module Ember
       result.stringify_keys
     end
 
+    # Load configuration file for partial exporting and
+    # custom output directory
+    def config
+      if config?
+        (YAML.load_file(config_file) || {}).with_indifferent_access
+      else
+        {}
+      end
+    end
+
+    # Check if configuration file exist
+    def config?
+      File.file? config_file
+    end
+
     # Copy configuration and JavaScript library files to
     # <tt>config/ember-i18n.yml</tt> and <tt>public/javascripts/i18n.js</tt>.
     def setup!
       FileUtils.mkdir_p(export_dir)
       FileUtils.cp(File.dirname(__FILE__) + "/../vendor/assets/javascripts/ember-i18n.js", javascript_file)
+      FileUtils.cp(File.dirname(__FILE__) + "/../config/ember-i18n.yml", config_file) unless config?
     end
 
     # Retrieve an updated JavaScript library from Github.
