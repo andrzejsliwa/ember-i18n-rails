@@ -36,7 +36,7 @@ describe Ember::I18n do
     default_locales_path = Dir[File.join('spec', 'resources', '*.yml').to_s]
     Ember::I18n.should_receive(:default_locales_path).at_least(:once).and_return(default_locales_path)
     Ember::I18n.export!
-    Rails.root.join(Ember::I18n.export_dir, "translations_en.js").should be_file
+    Rails.root.join(Ember::I18n.export_dir, "translations.js").should be_file
   end
 
   it "updates the javascript library" do

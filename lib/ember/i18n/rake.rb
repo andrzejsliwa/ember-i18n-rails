@@ -1,6 +1,6 @@
 namespace :ember do
   namespace :i18n do
-    desc "Copy i18n.js and configuration file"
+    desc "install ember-i18n.js"
     task :setup => :environment do
       Ember::I18n.setup!
     end
@@ -10,7 +10,7 @@ namespace :ember do
       Ember::I18n.export!
     end
 
-    desc "Update the JavaScript library"
+    desc "install ember-i18n.js"
     task :update => :environment do
       Ember::I18n.update!
     end

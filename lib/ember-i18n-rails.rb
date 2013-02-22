@@ -6,7 +6,6 @@ module Ember
 
     require "ember/i18n/railtie" if Rails.version >= "3.0"
     require "ember/i18n/engine" if Rails.version >= "3.1"
-    require "ember/i18n/middleware"
 
     # deep_merge by Stefan Rusterholz, see http://www.ruby-forum.com/topic/142809
     MERGER = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &MERGER) : v2 }
@@ -43,9 +42,7 @@ module Ember
     # Export translations to JavaScript, considering settings
     # from configuration file
     def export!
-      translations.keys.each do |locale|
-        save(flat_hash(translations[locale]), File.join(export_dir, "translations_#{locale}.js"))
-      end
+      save(flat_hash(translations), File.join(export_dir, "translations.js"))
     end
 
     def flat_hash(data, prefix = '', result = {})
