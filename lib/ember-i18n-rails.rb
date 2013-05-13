@@ -39,15 +39,27 @@ module Ember
     # Export translations to JavaScript, considering settings
     # from configuration file
     def export!
+      puts "Exporting translations:\n"
       if config[:split]
         translations.keys.each do |locale|
-          translations_hash = translations[locale]
-          translations_hash.each do |key, value|
-            english_fallback = translations["en"][key]
-            puts "Translation #{key} is missing for #{locale}! Taking english default '#{english_fallback}'"
-            translations_hash[key] = english_fallback if value == nil && value == ""
+          if translations[:en].nil?
+            puts "Missing english translation"
+            exit
           end
-          save(flat_hash(translations[locale]), File.join(export_dir, "translations_#{locale}.js"))
+          puts "\nLocale: #{locale}"
+          fallback_english_hash = flat_hash(translations[:en])
+          translations_hash = flat_hash(translations[locale])
+          if locale != :en
+            translations_hash.each do |key, value|
+              english_fallback = fallback_english_hash[key]
+              if value == nil || value == ""
+                puts "  #{key} missing!"
+                puts "     taking english default: '#{english_fallback}'"
+                translations_hash[key] = english_fallback
+              end
+            end
+          end
+          save(translations_hash, File.join(export_dir, "translations_#{locale}.js"))
         end
       else
         save(flat_hash(translations), File.join(export_dir, "translations.js"))
