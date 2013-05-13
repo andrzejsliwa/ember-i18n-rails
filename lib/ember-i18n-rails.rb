@@ -41,6 +41,12 @@ module Ember
     def export!
       if config[:split]
         translations.keys.each do |locale|
+          translations_hash = translations[locales]
+          translations_hash.each do |key, value|
+            english_fallback = translations["en"][key]
+            puts "Translation #{key} is missing for #{locale}! Taking english default '#{english_fallback}'"
+            translations_hash[key] = english_fallback if value == nil && value == ""
+          end
           save(flat_hash(translations[locale]), File.join(export_dir, "translations_#{locale}.js"))
         end
       else
