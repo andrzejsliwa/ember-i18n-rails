@@ -41,7 +41,7 @@ module Ember
     def export!
       if config[:split]
         translations.keys.each do |locale|
-          translations_hash = translations[locales]
+          translations_hash = translations[locale]
           translations_hash.each do |key, value|
             english_fallback = translations["en"][key]
             puts "Translation #{key} is missing for #{locale}! Taking english default '#{english_fallback}'"
