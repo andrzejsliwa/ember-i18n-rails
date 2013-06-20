@@ -1,9 +1,8 @@
 (function(window) {
-  var I18n, assert, findTemplate, get, isBinding, isTranslatedAttribute, lookupKey, pluralForm;
-
-  isTranslatedAttribute = /(.+)Translation$/;
+  var I18n, assert, findTemplate, get, set, isBinding, lookupKey, pluralForm;
 
   get = Ember.Handlebars.get || Ember.Handlebars.getPath || Ember.getPath;
+  set = Ember.set;
 
   if (typeof CLDR !== "undefined" && CLDR !== null) pluralForm = CLDR.pluralForm;
 
@@ -12,18 +11,16 @@
   }
 
   lookupKey = function(key, hash) {
-    var firstKey, idx, remainingKeys, result;
-    result = hash[key];
-    idx = key.indexOf('.');
+    var firstKey, idx, remainingKeys;
 
-    if (!result && idx !== -1) {
+    if (hash[key] != null) { return hash[key]; }
+
+    if ((idx = key.indexOf('.')) !== -1) {
       firstKey = key.substr(0, idx);
       remainingKeys = key.substr(idx + 1);
       hash = hash[firstKey];
-      if (hash) result = lookupKey(remainingKeys, hash);
+      if (hash) { return lookupKey(remainingKeys, hash); }
     }
-
-    return result;
   };
 
   assert = Ember.assert != null ? Ember.assert : window.ember_assert;
@@ -44,6 +41,18 @@
 
     return result;
   };
+
+  function eachTranslatedAttribute(object, fn) {
+    var isTranslatedAttribute = /(.+)Translation$/,
+        isTranslatedAttributeMatch;
+
+    for (var key in object) {
+      isTranslatedAttributeMatch = key.match(isTranslatedAttribute);
+      if (isTranslatedAttributeMatch) {
+        fn.call(object, isTranslatedAttributeMatch[1], I18n.t(object[key]));
+      }
+    }
+  }
 
   I18n = {
     compile: Handlebars.compile,
@@ -67,21 +76,22 @@
       return template(context);
     },
 
+    TranslateableProperties: Em.Mixin.create({
+      init: function() {
+        var result = this._super.apply(this, arguments);
+        eachTranslatedAttribute(this, function(attribute, translation) {
+          set(this, attribute, translation);
+        });
+        return result;
+      }
+    }),
+
     TranslateableAttributes: Em.Mixin.create({
       didInsertElement: function() {
-        var attribute, isTranslatedAttributeMatch, key, path, result, translatedValue;
-        result = this._super.apply(this, arguments);
-
-        for (key in this) {
-          path = this[key];
-          isTranslatedAttributeMatch = key.match(isTranslatedAttribute);
-          if (isTranslatedAttributeMatch) {
-            attribute = isTranslatedAttributeMatch[1];
-            translatedValue = I18n.t(path);
-            this.$().attr(attribute, translatedValue);
-          }
-        }
-
+        var result = this._super.apply(this, arguments);
+        eachTranslatedAttribute(this, function(attribute, translation) {
+          this.$().attr(attribute, translation);
+        });
         return result;
       }
     })
