@@ -1,13 +1,16 @@
 (function(window) {
-  var I18n, assert, findTemplate, get, set, isBinding, lookupKey, pluralForm;
+  var I18n, assert, findTemplate, get, set, isBinding, lookupKey, pluralForm,
+      keyExists;
 
   get = Ember.Handlebars.get || Ember.Handlebars.getPath || Ember.getPath;
   set = Ember.set;
 
+  function warn(msg) { Ember.Logger.warn(msg); }
+
   if (typeof CLDR !== "undefined" && CLDR !== null) pluralForm = CLDR.pluralForm;
 
   if (pluralForm == null) {
-    Ember.Logger.warn("CLDR.pluralForm not found. Em.I18n will not support count-based inflection.");
+    warn("CLDR.pluralForm not found. Em.I18n will not support count-based inflection.");
   }
 
   lookupKey = function(key, hash) {
@@ -31,7 +34,10 @@
 
     if (setOnMissing) {
       if (result == null) {
-        result = I18n.translations[key] = I18n.compile("Missing translation: " + key);
+        result = I18n.translations[key] = function() { return "Missing translation: " + key; };
+        result._isMissing = true;
+        warn("Missing translation: " + key);
+        I18n[(typeof I18n.trigger === 'function' ? 'trigger' : 'fire')]('missing', key); //Support 0.9 style .fire
       }
     }
 
@@ -40,6 +46,11 @@
     }
 
     return result;
+  };
+
+  keyExists = function(key) {
+    var translation = lookupKey(key, I18n.translations);
+    return translation != null && !translation._isMissing;
   };
 
   function eachTranslatedAttribute(object, fn) {
@@ -54,7 +65,7 @@
     }
   }
 
-  I18n = {
+  I18n = Ember.Evented.apply({
     compile: Handlebars.compile,
 
     translations: {},
@@ -76,6 +87,8 @@
       return template(context);
     },
 
+    exists: keyExists,
+
     TranslateableProperties: Em.Mixin.create({
       init: function() {
         var result = this._super.apply(this, arguments);
@@ -95,11 +108,21 @@
         return result;
       }
     })
-  };
+  });
 
   Ember.I18n = I18n;
 
   isBinding = /(.+)Binding$/;
+
+  // CRUFT: in v2, which requires Ember 1.0+, Ember.uuid will always be
+  //        available, so this function can be cleaned up.
+  var uniqueElementId = (function(){
+    var id = Ember.uuid || 0;
+    return function() {
+      var elementId = 'i18n-' + id++;
+      return elementId;
+    };
+  })();
 
   Handlebars.registerHelper('t', function(key, options) {
     var attrs, context, data, elementID, result, tagName, view;
@@ -109,7 +132,7 @@
     view = data.view;
     tagName = attrs.tagName || 'span';
     delete attrs.tagName;
-    elementID = "i18n-" + (Ember.uuid++);
+    elementID = uniqueElementId();
 
     Em.keys(attrs).forEach(function(property) {
       var bindPath, currentValue, invoker, isBindingMatch, normalized, normalizedPath, observer, propertyName, root, _ref;
