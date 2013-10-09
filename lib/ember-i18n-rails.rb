@@ -116,8 +116,11 @@ module Ember
       file = Rails.root.join(file)
       FileUtils.mkdir_p File.dirname(file)
 
+      variable_to_assign = config.fetch(:variable, "Em.I18n.translations")
+
       File.open(file, "w+") do |f|
-        f << 'Em.I18n.translations = '
+        f << variable_to_assign
+        f << ' = '
         f << JSON.pretty_generate(translations).html_safe
         f << ';'
       end
