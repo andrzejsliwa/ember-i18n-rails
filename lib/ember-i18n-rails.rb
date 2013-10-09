@@ -117,9 +117,13 @@ module Ember
       FileUtils.mkdir_p File.dirname(file)
 
       File.open(file, "w+") do |f|
-        f << 'Em.I18n.translations = '
+        f << 'if (typeof bbox === "undefined" || bbox === null) { bbox = {}; };'
+        f << 'bbox.translations = '
         f << JSON.pretty_generate(translations).html_safe
         f << ';'
+        f << 'if (typeof(Em) !== "undefined" && typeof(Em.I18n) !== "undefined") {'
+        f << ' Em.I18n.translations = bbox.translations;'
+        f << '};'
       end
     end
 
