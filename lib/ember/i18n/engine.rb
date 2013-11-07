@@ -10,7 +10,7 @@ module Ember
         config = I18n.config_file
         cache_file = I18n::Engine.load_path_hash_cache
 
-        Rails.application.assets.register_preprocessor "application/javascript", :"ember-i18n-rails_dependencies" do |context, data|
+        ::Rails.application.assets.register_preprocessor "application/javascript", :"ember-i18n-rails_dependencies" do |context, data|
           if context.logical_path == I18N_TRANSLATIONS_ASSET
             context.depend_on(config) if I18n.config?
             # also set up dependencies on every locale file
@@ -31,11 +31,11 @@ module Ember
       # rewrite path cache hash at startup and before each request in development
       config.to_prepare do
         next unless Ember::I18n.has_asset_pipeline?
-        Ember::I18n::Engine.write_hash_if_changed unless Rails.env.production?
+        Ember::I18n::Engine.write_hash_if_changed unless ::Rails.env.production?
       end
 
       def self.load_path_hash_cache
-        @load_path_hash_cache ||= Rails.root.join("tmp/ember-i18n.cache")
+        @load_path_hash_cache ||= ::Rails.root.join("tmp/ember-i18n.cache")
       end
 
       def self.write_hash_if_changed
@@ -48,7 +48,7 @@ module Ember
       end
 
       def self.write_hash!
-        FileUtils.mkdir_p Rails.root.join("tmp")
+        FileUtils.mkdir_p ::Rails.root.join("tmp")
 
         File.open(load_path_hash_cache, "w+") do |f|
           f.write(cached_load_path_hash)
