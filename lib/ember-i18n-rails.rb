@@ -4,7 +4,7 @@ module Ember
   module I18n
     extend self
 
-    require "ember/i18n/railtie" if ::Rails.version >= "3.0" && ::Rails.version < "4.0"
+    require "ember/i18n/railtie" if ::Rails.version >= "3.0"
     require "ember/i18n/engine" if ::Rails.version >= "3.1"
 
     # Under rails 3.1.1 and higher, perform a check to ensure that the
