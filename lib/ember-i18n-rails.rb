@@ -4,24 +4,24 @@ module Ember
   module I18n
     extend self
 
-    require "ember/i18n/railtie" if Rails.version >= "3.0"
-    require "ember/i18n/engine" if Rails.version >= "3.1"
+    require "ember/i18n/railtie" if ::Rails.version >= "3.0"
+    require "ember/i18n/engine" if ::Rails.version >= "3.1"
 
     # Under rails 3.1.1 and higher, perform a check to ensure that the
     # full environment will be available during asset compilation.
     # This is required to ensure I18n is loaded.
     def assert_usable_configuration!
-      @usable_configuration ||= Rails.version >= "3.1.1" &&
-        Rails.configuration.assets.initialize_on_precompile ||
+      @usable_configuration ||= ::Rails.version >= "3.1.1" &&
+        ::Rails.configuration.assets.initialize_on_precompile ||
         raise("Cannot precompile ember-i18n translations unless environment is initialized. Please set config.assets.initialize_on_precompile to true.")
     end
 
     def has_asset_pipeline?
-      Rails.configuration.respond_to?(:assets) && Rails.configuration.assets.enabled
+      ::Rails.configuration.respond_to?(:assets) && ::Rails.configuration.assets.enabled
     end
 
     def config_file
-      Rails.root.join("config/ember-i18n.yml")
+      ::Rails.root.join("config/ember-i18n.yml")
     end
 
     def export_dir
@@ -33,7 +33,7 @@ module Ember
     end
 
     def javascript_file
-      Rails.root.join(export_dir, "ember-i18n.js")
+      ::Rails.root.join(export_dir, "ember-i18n.js")
     end
 
     # Export translations to JavaScript, considering settings
@@ -113,7 +113,7 @@ module Ember
 
     # Convert translations to JSON string and save file.
     def save(translations, file)
-      file = Rails.root.join(file)
+      file = ::Rails.root.join(file)
       FileUtils.mkdir_p File.dirname(file)
 
       variable_to_assign = config.fetch(:variable, "Em.I18n.translations")
@@ -136,7 +136,7 @@ module Ember
     end
 
     def default_locales_path
-      Dir[Rails.root.join('config', 'locales', '*.yml').to_s]
+      Dir[::Rails.root.join('config', 'locales', '*.yml').to_s]
     end
   end
 end
